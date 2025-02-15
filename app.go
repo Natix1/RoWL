@@ -85,13 +85,14 @@ func main() {
 	}
 
 	router := gin.Default()
+	api := router.Group("/api")
 	router.SetTrustedProxies([]string{
 		"127.0.0.1",
 	})
 
-	router.GET("/ping", pong)
-	router.GET("/", landing)
-	router.GET("/whitelistcheck", whitelistCheckHandler)
+	api.GET("/ping", pong)
+	api.GET("/", landing)
+	api.GET("/whitelistcheck", whitelistCheckHandler)
 
 	address := ADDR + ":" + strconv.Itoa(PORT)
 	router.Run(address)
