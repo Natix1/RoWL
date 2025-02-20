@@ -3,12 +3,13 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	_ "github.com/go-sql-driver/mysql"
-	"github.com/joho/godotenv"
 	"log"
 	"os"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/joho/godotenv"
 )
 
 const (
@@ -21,6 +22,11 @@ const (
 )
 
 var db *sql.DB
+
+type AliveRequest struct {
+	JobId       string `json:"jobId"`
+	PlayerCount int    `json:"playerCount"`
+}
 
 func checkUserWhitelist(UserId int) bool {
 	var count int
@@ -55,6 +61,18 @@ func whitelistCheckHandler(context *gin.Context) {
 	} else {
 		context.String(200, "False")
 	}
+}
+
+func ServerPostHandler(context *gin.Context) {
+	var request AliveRequest
+
+	if err := context.ShouldBindJSON(&request); err != nil {
+		context.String(400, "Bad request: "+err.Error())
+		return
+	}
+
+	fmt.Println("Received JobId: " + request.JobId + " with " + strconv.Itoa(request.PlayerCount) + " players!")
+	context.String(200, "Received!")
 }
 
 func main() {
@@ -93,6 +111,7 @@ func main() {
 	api.GET("/ping", pong)
 	api.GET("/", landing)
 	api.GET("/whitelistcheck", whitelistCheckHandler)
+	api.POST("/roblox_server_response", ServerPostHandler)
 
 	address := ADDR + ":" + strconv.Itoa(PORT)
 	router.Run(address)
